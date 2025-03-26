@@ -1,0 +1,4 @@
+aio-dbg/*
+cmake-build-debug/*
+
+.idea/*
