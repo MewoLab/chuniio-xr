@@ -3,18 +3,22 @@
 //
 
 
-#include <led_pipe.hh>
+#include <xr/led_pipe.hh>
 
 HANDLE pipe;
 const auto pipeName = TEXT("\\\\.\\pipe\\chuni_led");
 
 unsigned char* billboardBuffer = static_cast<unsigned char*>(malloc(LED_BILLBOARD_COUNT));
+unsigned char* sliderBuffer = static_cast<unsigned char*>(malloc(LED_SLIDER_COUNT));
 
 unsigned char readNextByte() {
     unsigned char byte = 0;
     ReadFile(pipe, &byte, 1, nullptr, nullptr);
     return byte;
 };
+int gammaCorrect(int v) {
+    return pow(v, 2.2f);
+}
 
 DWORD WINAPI accessLEDThread() {
     while (true) {
@@ -39,6 +43,8 @@ DWORD WINAPI accessLEDThread() {
                 memcpy(billboardBuffer, buffer.data(), buffer.size() - (3 * 3)); break;
             case 1:
                 memcpy(billboardBuffer + (50 * 3), buffer.data(), buffer.size() - (3 * 3)); break;
+            case 2:
+                memcpy(sliderBuffer, buffer.data(), buffer.size()); break;
             default: break;
         }
     };
@@ -85,5 +91,10 @@ int initializeLEDPipe() {
 
 void getBillboardLEDs(int* buffer) {
     for (int i = 0; i < LED_BILLBOARD_COUNT; i++)
-        buffer[i] = static_cast<int>(billboardBuffer[i]);
+        buffer[i] = gammaCorrect(static_cast<int>(billboardBuffer[i]));
+}
+
+void getSliderLEDs(int* buffer) {
+    for (int i = 0; i < LED_SLIDER_COUNT; i++)
+        buffer[i] = gammaCorrect(static_cast<int>(sliderBuffer[i]));
 }

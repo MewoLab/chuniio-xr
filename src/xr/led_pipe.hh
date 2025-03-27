@@ -8,6 +8,7 @@
 #include <lib.hh>
 
 #define LED_BILLBOARD_COUNT (110 * 3)
+#define LED_SLIDER_COUNT (31 * 3)
 
 enum LedInitializeResult: int {
     Success,
@@ -20,5 +21,7 @@ int initializeLEDPipe();
 
 extern "C" __declspec(dllexport)
 void getBillboardLEDs(int* buffer);
+extern "C" __declspec(dllexport)
+void getSliderLEDs(int* buffer);
 
 #endif //LED_PIPE_HH

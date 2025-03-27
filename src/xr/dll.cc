@@ -3,7 +3,7 @@
 //
 
 #include <lib.hh>
-#include <led_pipe.hh>
+#include <xr/led_pipe.hh>
 
 BOOL WINAPI DllMain(
     HINSTANCE hinstDLL,  // handle to DLL module
