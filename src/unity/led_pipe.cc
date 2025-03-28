@@ -3,7 +3,7 @@
 //
 
 
-#include <xr/led_pipe.hh>
+#include <unity/led_pipe.hh>
 
 HANDLE pipe;
 const auto pipeName = TEXT("\\\\.\\pipe\\chuni_led");
@@ -13,7 +13,11 @@ unsigned char* sliderBuffer = static_cast<unsigned char*>(malloc(LED_SLIDER_COUN
 
 unsigned char readNextByte() {
     unsigned char byte = 0;
-    ReadFile(pipe, &byte, 1, nullptr, nullptr);
+    if (!ReadFile(pipe, &byte, 1, nullptr, nullptr)) {
+        CloseHandle(pipe);
+        pipe = nullptr;
+        initializeLEDPipe();
+    }
     return byte;
 };
 int gammaCorrect(int v) {
@@ -47,11 +51,13 @@ DWORD WINAPI accessLEDThread() {
                 memcpy(sliderBuffer, buffer.data(), buffer.size()); break;
             default: break;
         }
+        buffer.clear();
+        std::vector<unsigned char>().swap(buffer); // delete all instances
     };
     return 0;
 };
 
-int initializeLEDPipe() {
+DWORD initializeLEDPipe() {
     if (pipe) return LedInitializeResult::AlreadyExists;
 
     SECURITY_ATTRIBUTES securityAttributes;
@@ -63,8 +69,9 @@ int initializeLEDPipe() {
         pipe = CreateFile(pipeName, GENERIC_READ | FILE_WRITE_ATTRIBUTES, 0, &securityAttributes, OPEN_EXISTING, 0, nullptr);
         if (pipe != INVALID_HANDLE_VALUE)
             break;
+        CloseHandle(pipe);
         printf("Failed to connect to LED pipe.\n");
-        Sleep(2000);
+        Sleep(1000);
     };
 
     printf("Connected to LED pipe.\n");
@@ -74,17 +81,6 @@ int initializeLEDPipe() {
         printf("Failed to set pipe mode.\n");
         return LedInitializeResult::AccessDenied;
     };
-
-    CreateThread(
-        nullptr,
-        0,
-        reinterpret_cast<LPTHREAD_START_ROUTINE>(accessLEDThread),
-        nullptr,
-        0,
-        nullptr
-        );
-
-    Sleep(1000);
 
     return LedInitializeResult::Success;
 }

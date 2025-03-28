@@ -10,14 +10,18 @@
 #define LED_BILLBOARD_COUNT (110 * 3)
 #define LED_SLIDER_COUNT (31 * 3)
 
-enum LedInitializeResult: int {
+enum LedInitializeResult: DWORD {
     Success,
     DoesntExist,
     AccessDenied,
     AlreadyExists,
 };
 
-int initializeLEDPipe();
+DWORD initializeLEDPipe();
+DWORD accessLEDThread();
+
+extern "C" __declspec(dllexport)
+void initialize();
 
 extern "C" __declspec(dllexport)
 void getBillboardLEDs(int* buffer);
