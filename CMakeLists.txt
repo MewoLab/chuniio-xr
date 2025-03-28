@@ -13,7 +13,8 @@ ExternalProject_Add(
             -A Win32
             -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}/install_32
         BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/32bit-build
-        #INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config $<CONFIG>
+        INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install --config $<CONFIG>
+        BUILD_ALWAYS TRUE
 )
 
 # 64-bit (amdaemon)
